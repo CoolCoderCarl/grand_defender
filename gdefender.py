@@ -4,7 +4,7 @@ import time
 import platform
 import threading
 
-warning = """
+warning_message = """
             Please, input password. 
             PC will shutdown:
             1) If you did not input correct password 
@@ -87,7 +87,8 @@ def is_pass_correct():
 
 
 if __name__ == '__main__':
+    pass
 
-    print(warning)
+    print(warning_message)
     # Run timer
     # Check pass
