@@ -17,7 +17,7 @@ shutdown_win = "shutdown /s /t 1"
 shutdown_nix = "shutdown now -h"
 
 
-def is_timer_finished(t=10):
+def is_timer_finished(t=30):
     """
     Return True when timer is finished
     :param t:
