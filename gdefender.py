@@ -1,8 +1,7 @@
 import os
-import sys
 import time
 import platform
-import threading
+from threading import Thread
 
 warning = """
             Please, input password. 
@@ -17,7 +16,7 @@ shutdown_win = "shutdown /s /t 1"
 shutdown_nix = "shutdown now -h"
 
 
-def is_timer_finished(t=10):
+def is_timer_finished(t=10) -> bool:
     """
     Return True when timer is finished
     :param t:
@@ -29,22 +28,25 @@ def is_timer_finished(t=10):
     return True
 
 
-def get_pass():
+def get_pass() -> str:
     """
     Read password from file
     :return:
     """
-    password_file = open("password", "r")
-    password = password_file.read()
-    return password
+    try:
+        password_file = open("password", "r")
+        password = password_file.read()
+        return password
+    except FileNotFoundError:
+        exit(1)
 
 
-def is_linux():
+def is_linux() -> bool:
     """
     Check is current system Linux
     :return:
     """
-    if 'Linux' in platform.system():
+    if 'linux' in str(platform.system()).lower():
         return True
     else:
         return False
@@ -57,10 +59,11 @@ def shutdown_system():
     :return:
     """
     if is_linux():
-        os.system(shutdown_nix)
+        # os.system(shutdown_nix)
+        print("TURN OFF")
     else:
-        print("FAIL")
-        os.system(shutdown_win)
+        print("TURN OFF")
+        # os.system(shutdown_win)
 
 
 def timer():
@@ -73,7 +76,7 @@ def timer():
         shutdown_system()
 
 
-def is_pass_correct():
+def check_the_pass():
     """
     Check is password is correct
     If not shutdown system
@@ -81,7 +84,7 @@ def is_pass_correct():
     """
     input_password = input("Password:")
     if input_password == get_pass():
-        sys.exit()
+        exit(0)
     else:
         shutdown_system()
 
@@ -89,5 +92,15 @@ def is_pass_correct():
 if __name__ == '__main__':
 
     print(warning)
+
+    passw_thread = Thread(target=check_the_pass())
+    timer_thread = Thread(target=timer())
+
+    passw_thread.daemon = True
+    passw_thread.start()
+    timer_thread.start()
+
+    passw_thread.join()
+    timer_thread.join()
     # Run timer
     # Check pass
