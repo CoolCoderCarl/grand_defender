@@ -1,9 +1,9 @@
 import os
-import time
 import platform
-from threading import Thread
+import time
+from threading import Event, Thread, Timer
 
-warning = """
+WARNING_MSG = """
             Please, input password. 
             PC will shutdown:
             1) If you did not input correct password 
@@ -11,12 +11,12 @@ warning = """
             3) If you close this window
 """
 
-timer_msg = "Time is up !"
-shutdown_win = "shutdown /s /t 1"
-shutdown_nix = "shutdown now -h"
+TIMER_MSG = "Time is up !"
+SHUTDOWN_WIN = "shutdown /s /t 1"
+SHUTDOWN_NIX = "shutdown now -h"
 
 
-def is_timer_finished(t=10) -> bool:
+def is_timer_finished(t: int) -> bool:
     """
     Return True when timer is finished
     :param t:
@@ -46,7 +46,7 @@ def is_linux() -> bool:
     Check is current system Linux
     :return:
     """
-    if 'linux' in str(platform.system()).lower():
+    if "linux" in str(platform.system()).lower():
         return True
     else:
         return False
@@ -59,20 +59,22 @@ def shutdown_system():
     :return:
     """
     if is_linux():
-        # os.system(shutdown_nix)
         print("TURN OFF")
+        # os.system(SHUTDOWN_NIX)
     else:
         print("TURN OFF")
-        # os.system(shutdown_win)
+        # os.system(SHUTDOWN_WIN)
 
 
-def timer():
+def timer(t=10, *args):
     """
     If time is up, notify user about it and shutdown system
     :return:
     """
-    if is_timer_finished():
-        print(timer_msg)
+    if is_timer_finished(t):
+        print(TIMER_MSG)
+        # if event.is_set():
+        #     exit(0)
         shutdown_system()
 
 
@@ -82,25 +84,21 @@ def check_the_pass():
     If not shutdown system
     :return:
     """
-    input_password = input("Password:")
+    input_password = input("Password:") or "\n"
     if input_password == get_pass():
         exit(0)
     else:
         shutdown_system()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    print(warning)
+    event = Event()
+    print(WARNING_MSG)
 
-    passw_thread = Thread(target=check_the_pass())
-    timer_thread = Thread(target=timer())
+    timer_thread = Thread(target=timer, args=(10, event.set()))
+    passw_thread = Thread(target=check_the_pass)
 
     passw_thread.daemon = True
-    passw_thread.start()
     timer_thread.start()
-
-    passw_thread.join()
-    timer_thread.join()
-    # Run timer
-    # Check pass
+    passw_thread.start()
